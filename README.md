@@ -10,10 +10,10 @@ How to use:
 You can choose to navigate to the parent directory in your browser, and run the migrations from the web interface, or you can just run them from the command line with:
    php index.php run
  
-The format for new migration files is:
-   -put just the .sql file within the /migrations/migrations/ folder, with the format:
-       {index}_any_name_you_want.sql
-   -the index should be numeric and in order so the system can maintain it's dependencies.
+To create new migrations:
+	-put just the .sql file within the /migrations/migrations/ folder, with the format:
+		{index}_any_name_you_want.sql
+	-the index should be numeric and in order so the system can maintain it's dependencies.
 
 You can configure your specific database settings in /migrations/lib/migrations.php, at the top of the file.
 
