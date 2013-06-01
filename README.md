@@ -11,6 +11,7 @@ You can choose to navigate to the parent directory in your browser, and run the 
    php index.php run
  
 The format for new migration files is:
+
 -put just the .sql file within the /migrations/migrations/ folder, with the format:
     {index}_any_name_you_want.sql
 -the index should be numeric and in order so the system can maintain it's dependencies.
