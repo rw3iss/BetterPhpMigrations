@@ -19,4 +19,4 @@ You can configure your specific database settings in /migrations/lib/migrations.
 
 Right now the framework just keeps track of which .sql files are the in the /migrations folder. When you run migrations, it puts these filenames in the migrations schema table. Very simple.
 
-There is no 'back' feature as of yet. More features to come...
+There is no 'back' feature as of yet. More features to come.
