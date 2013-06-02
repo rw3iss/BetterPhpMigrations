@@ -17,7 +17,7 @@ To create new migrations:
 	
 		{index}_any_name_you_want.sql
 		
-	-the index should be numeric and in order so the system can maintain it's dependencies.
+	-the index should be numeric and in order so the system can maintain its dependencies.
 
 
 You can configure your specific database settings in /migrations/lib/migrations.php, at the top of the file.
