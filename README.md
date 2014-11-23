@@ -15,7 +15,7 @@ To create new migrations:
 
 	-put just the .sql file within the /migrations/migrations/ folder, with the format:
 	
-		{index}_any_name_you_want.sql
+		{index}_anyname.sql
 		
 	-the index should be numeric and in order so the system can maintain its dependencies.
 
@@ -24,4 +24,4 @@ You can configure your specific database settings in /migrations/lib/migrations.
 
 Right now the framework just keeps track of which .sql files are the in the /migrations folder. When you run migrations, it puts these filenames in the migrations schema table. Very simple.
 
-There is no 'back' feature as of yet. More features to come.
+There is no 'back' or undo feature as of yet. More features to come.
