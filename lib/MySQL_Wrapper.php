@@ -195,6 +195,11 @@ class MySQL_wrapper {
 		return $this->query ? $this->query : FALSE;
 	}
 	
+	function getLastError($link = 0) {
+		$this->link = $link ? $link : $this->link;
+		return @mysql_error($link);
+	}
+
 	/** Get number of fields in result
 	 * @param 	resource 	$query 		- MySQL Query Result
 	 * @return 	integer 	- Retrieves the number of fields from a query

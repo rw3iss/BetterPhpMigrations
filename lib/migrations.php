@@ -1,33 +1,25 @@
 <?php
+require_once('config.php');
 require_once('MySQL_Wrapper.php');
-
-global $dbServer;
-global $dbName;
-global $dbUser;
-global $dbPass;
-
-$dbServer = "";
-$dbName = "";
-$dbUser = "";
-$dbPass = "";
 
 class Migrations {
 	private $migrationsDir = "migrations";
 	private $migrationsTable= "migrations";
 	private $db;
-	private $is_installed = false;
+	public $isInstalled = false;
 	public $migrationsData = null;
 
 	function Migrations() {
-		global $dbServer, $dbName, $dbUser, $dbPass;
-		$this->db = new MySQL_wrapper($dbServer, $dbUser, $dbPass, $dbName);
-		$this->is_installed = $this->is_installed();
+		global $config;
+		$this->db = new MySQL_wrapper($config['dbserver'], $config['dbuser'], $config['dbpass'], $config['dbname']);
+		$this->isInstalled = $this->is_installed();
 		$this->migrationsData = $this->get_migrations_data();
 	}
 
 	//are we setup yet?
 	public function is_installed() {
-		global $dbName;		
+		global $config;
+
 		$is_installed = false;
 
 		$this->db->connect();
@@ -35,9 +27,10 @@ class Migrations {
 		$sql = sprintf("SELECT COUNT(*) AS count
         		FROM information_schema.tables 
         		WHERE table_schema = '%s'
-        		AND table_name = '%s'", $dbName, $this->migrationsTable);
+        		AND table_name = '%s'", $config['dbname'], $this->migrationsTable);
 
         $result = $this->db->fetchArray($this->db->query($sql));
+
         if(isset($result['count'])) {
         	if($result['count'] == 1)
         		$is_installed = true;
@@ -63,15 +56,17 @@ class Migrations {
 		$sql = sprintf("INSERT INTO %s (ran_migrations, last_migration_date) VALUES ('%s', '%s')",
 					$this->migrationsTable,
 					implode(',',$this->migrationsData->ran_migrations),
-					$this->migrationsData->last_migration_date);
+					date('Y-m-d H:i:s'));
 
 		$this->db->query($sql);
+
+		$this->isInstalled = true;
 
 		$this->db->close();		
 	}
 
 	function uninstall() {		
-		if(!$this->is_installed)
+		if(!$this->isInstalled)
 			return null;
 
 		$sql = sprintf("DROP TABLE %s", $this->migrationsTable);
@@ -79,21 +74,24 @@ class Migrations {
 		$this->db->connect();
 		$this->db->query($sql);
 		$this->db->close();		
+
+		$this->isInstalled = false;
 	}
 
 	public function get_migrations_data() {
 		$data = new MigrationsData();
 
-		if(!$this->is_installed)
+		if(!$this->isInstalled)
 			return $data;
 
 		$this->db->connect();
 
 		$sql = sprintf("SELECT * from %s", $this->migrationsTable);
         $result = $this->db->fetchQueryToArray($sql);
-        $first = is_array($result) ? $result[0] : $result;
 
         if($result != null) {
+        	$first = is_array($result) ? $result[0] : $result;
+
         	$data->ran_migrations = array_filter(explode(',', trim($first['ran_migrations'])));
         	$data->last_migration_date = "";
         	if(!(int)$first['last_migration_date'])
@@ -143,7 +141,7 @@ class Migrations {
 
 		$this->db->connect();
 
-		if(!$this->is_installed)
+		if(!$this->isInstalled)
 			return $this->get_all_migrations();
 
 		//find which migrations have already been run
@@ -174,8 +172,8 @@ class Migrations {
 		return $newMigrations;
 	}
 
-	public function run_new_migrations() {
-		if(!$this->is_installed)
+	public function run_new_migrations($migrationCallback = null) {
+		if(!$this->isInstalled)
 			return null;
 
 		$this->db->connect();
@@ -188,15 +186,18 @@ class Migrations {
 		//open each new migration file and run it
 		foreach($newMigrations as $i => $m) {
 			try {
-				$path = getcwd() . '\\' . $this->migrationsDir . "\\" . $m;
+				$path = getcwd() . DIRECTORY_SEPARATOR . $this->migrationsDir . DIRECTORY_SEPARATOR . $m;
 				$sql = file_get_contents($path);
 				$this->db->query($sql);
 				array_push($ranMigrations, $m);
-				echo '<br/>ran: ' . $m;
 				$lastMigrationDate = gmdate("Y-m-d H:i:s");
 			}
 			catch(Exception $ex) {
 				echo 'Error running migrations! = ' . print_r($ex);
+			}
+
+			if($migrationCallback != null) {
+				$migrationCallback($m);
 			}
 		}
 
@@ -266,7 +267,6 @@ class MigrationsData {
 	public $last_migration_date = '';
 }
 
-global $migrations;
 $migrations = new Migrations();
 
 ?>

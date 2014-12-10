@@ -1,65 +1,88 @@
 
 <?php require_once('lib/migrations.php');
- global $migrations;
+
+global $migrations;
+$lb = "<br/>";
+
+//running from command line?
+if(isset($argv[1])) {
+ 	$lb = "\n";
+ 	$action = $argv[1];
+ 	run_action($action);
+ 	return;
+}
+
+//or handle action from browser?
+if(isset($_GET['action'])) {
+ 	$lb = "<br/>";
+ 	$action = $_GET['action'];
+ 	run_action($action);
+ 	echo $lb;
+}
 
 function run_action($action) {
 	global $migrations;
+	global $lb;
 
  	switch($action) {
  		case 'install':
- 			echo 'installing...';
+ 			if($migrations->isInstalled) {
+ 				echo "Already installed.";
+ 				break;
+ 			}
+
+ 			echo 'Installing...';
  			$migrations->install();
+ 			echo 'Done!';
+
  			break;
+
  		case 'run':
- 			echo 'running...<br/>';
+ 			echo 'Running...';
  			$is_valid = $migrations->validate_migrations();
  			if($is_valid)
- 				$migrations->run_new_migrations();
+ 				$migrations->run_new_migrations(function($m) use ($lb) {
+ 					echo $lb."Ran: " . $m;
+ 				});
+ 			echo $lb.'Done!';
  			break;
+
  		case 'uninstall':
- 			echo 'uninstalling...';
+ 			echo 'Uninstalling...';
  			$migrations->uninstall();
+ 			echo 'Done!';
  			break;
+
  		case 'get_migrations_data':
- 			echo '<b>Ran migrations:</b><br/>';
+ 			echo '<b>Ran migrations:</b>' . $lb;
  			if(sizeof($migrations->migrationsData->ran_migrations) == 0) {
- 				echo '&nbsp;&nbsp;(none)<br/>';
+ 				echo '&nbsp;&nbsp;(none)'.$lb;
  			} else {
 	 			foreach($migrations->migrationsData->ran_migrations as $m) {
-	 				echo '&nbsp;&nbsp;' . $m . '<br/>';
+	 				echo '&nbsp;&nbsp;' . $m . $lb;
 	 			}	
  			}
  			$mDate = $migrations->migrationsData->last_migration_date;
- 			echo '<b>Last migration date:</b> <br/>&nbsp;&nbsp;';
+ 			echo '<b>Last migration date:</b> ' . $lb . '&nbsp;&nbsp;';
  			echo empty($mDate) ? '(none)' : $mDate;
- 			echo '<br/>';
+ 			echo $lb;
  			break;
+
  		case 'cleanup':
- 			echo 'cleaning...';
+ 			echo 'Cleaning...';
  			$migrations->clean_migrations();
+ 			echo 'Done!';
  			break;
+
  		default:
  			echo 'Action not supported: ' . $action;
  	}
 }
 
- //running from command line?
- if(isset($argv[1])) {
- 	$action = $argv[1];
- 	run_action($action);
- 	return;
- }
-
- //or handle action from browser?
- if(isset($_GET['action'])) {
- 	$action = $_GET['action'];
- 	run_action($action);
- 	echo '<br/>';
- }
 
  //resume normal page logic
 
- $is_installed = $migrations->is_installed();
+ $is_installed = $migrations->isInstalled;
 ?>
 
 
