@@ -2,7 +2,7 @@
 
 $config = array(
 	'dbhost'	=> 'localhost', //or localhost:port
-	'dbname' 	=> 'decaro',
+	'dbname' 	=> 'test',
 	'dbuser'	=> 'root',
 	'dbpass'	=> 'root'
 );
