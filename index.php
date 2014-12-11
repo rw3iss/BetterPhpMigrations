@@ -1,6 +1,8 @@
 
 <?php require_once('lib/migrations.php');
 
+date_default_timezone_set('America/New_York'); 
+
 global $migrations;
 $lb = "<br/>";
 
@@ -41,8 +43,11 @@ function run_action($action) {
  			echo 'Running...';
  			$is_valid = $migrations->validate_migrations();
  			if($is_valid)
- 				$migrations->run_new_migrations(function($m) use ($lb) {
+ 				$migrations->run_new_migrations(function($m, $e = null) use ($lb) {
  					echo $lb."Ran: " . $m;
+ 					if($e != null) {
+ 						echo ': ' . $e->getMessage() . $lb;
+ 					}
  				});
  			echo $lb.'Done!';
  			break;
